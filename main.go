@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"path"
+	"strconv"
+	"time"
 )
 
 type Entry struct {
@@ -14,9 +17,41 @@ type Entry struct {
 
 var data = []Entry{}
 
+var MIN = 0
+var MAX = 26
+
+func random(min, max int) int {
+	return rand.Intn(max-min) + min
+}
+
+func getString(len int64) string {
+	temp := ""
+	startChar := "A"
+	var i int64 = 1
+	for {
+		myRand := random(MIN, MAX)
+		newChar := string(startChar[0] + byte(myRand))
+		temp = temp + newChar
+		if i == len {
+			break
+		}
+		i++
+	}
+	return temp
+}
+
+func populate(n int, s []Entry) {
+	for i := 0; i < n; i++ {
+		name := getString(4)
+		surname := getString(4)
+		n := strconv.Itoa(random(100, 199))
+		data = append(data, Entry{name, surname, n})
+	}
+}
+
 func search(key string) *Entry {
 	for i, v := range data {
-		if v.Surname == key {
+		if v.Tel == key {
 			return &data[i]
 		}
 	}
@@ -25,7 +60,7 @@ func search(key string) *Entry {
 
 func list() {
 	for _, v := range data {
-		fmt.Println(v)
+		fmt.Printf("%+v\n", v)
 	}
 }
 
@@ -36,16 +71,21 @@ func main() {
 		fmt.Printf("Usage: %s search|list <arguments>\n", exe)
 		return
 	}
-	data = append(data, Entry{"Mihalis", "Tsoukalos", "2109417471"})
-	data = append(data, Entry{"Mary", "Doe", "2109416871"})
-	data = append(data, Entry{"John", "Black", "2109416123"})
+
+	SEED := time.Now().Unix()
+	rand.Seed(SEED)
+
+	// How many records to insery
+	n := 100
+	populate(n, data)
+	fmt.Printf("Data has %d entries.\n", len(data))
 
 	// Differentiate between the commands
 	switch arguments[1] {
 	// The search command
 	case "search":
 		if len(arguments) != 3 {
-			fmt.Println("Usage: search Surname")
+			fmt.Println("Usage: search Telnumber")
 			return
 		}
 		result := search(arguments[2])
